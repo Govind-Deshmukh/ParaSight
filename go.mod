@@ -1,3 +1,3 @@
-module monitoring_agent
+module parasight
 
 go 1.21

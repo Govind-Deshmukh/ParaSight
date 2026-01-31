@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
+	"net"
 	"net/http"
 	"os"
 	"strconv"
@@ -21,25 +22,72 @@ type LogConfig struct {
 var (
 	logs          []LogConfig
 	systemMetrics []string
+	allowedHosts  []string
+	allowAll      bool
 )
 
 func main() {
 	port := flag.Int("p", 8080, "Port")
 	logsFlag := flag.String("logs", "", "name:path,name:path")
 	metricsFlag := flag.String("system_metrics", "", "cpu,memory,disk")
+	hostsFlag := flag.String("allowed_hosts", "*", "Allowed IPs: * or ip1,ip2,ip3")
 	flag.Parse()
 
 	logs = parseLogConfig(*logsFlag)
 	systemMetrics = parseList(*metricsFlag)
+	parseAllowedHosts(*hostsFlag)
 
 	for _, log := range logs {
-		http.HandleFunc("/"+log.Name, logHandler(log.Path))
+		http.HandleFunc("/"+log.Name, protect(logHandler(log.Path)))
 	}
-	http.HandleFunc("/metrics", metricsHandler)
-	http.HandleFunc("/health", healthHandler)
+	http.HandleFunc("/metrics", protect(metricsHandler))
+	http.HandleFunc("/health", protect(healthHandler))
 
 	fmt.Printf("agent started on :%d\n", *port)
+	if allowAll {
+		fmt.Println("allowed_hosts: *")
+	} else {
+		fmt.Printf("allowed_hosts: %v\n", allowedHosts)
+	}
 	http.ListenAndServe(fmt.Sprintf(":%d", *port), nil)
+}
+
+func parseAllowedHosts(s string) {
+	if s == "*" || s == "" {
+		allowAll = true
+		return
+	}
+	allowedHosts = strings.Split(s, ",")
+}
+
+func protect(next http.HandlerFunc) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		if !allowAll {
+			ip := getClientIP(r)
+			if !isAllowed(ip) {
+				http.Error(w, "forbidden", 403)
+				return
+			}
+		}
+		next(w, r)
+	}
+}
+
+func getClientIP(r *http.Request) string {
+	host, _, err := net.SplitHostPort(r.RemoteAddr)
+	if err != nil {
+		return r.RemoteAddr
+	}
+	return host
+}
+
+func isAllowed(ip string) bool {
+	for _, allowed := range allowedHosts {
+		if allowed == ip {
+			return true
+		}
+	}
+	return false
 }
 
 func parseLogConfig(s string) []LogConfig {

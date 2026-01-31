@@ -5,15 +5,28 @@ Lightweight Go agent that runs alongside your application. Exposes logs and syst
 ## Download
 
 ```bash
-wget https://github.com/govind-deshmukh/parasight/raw/main/releases/parasight-linux-amd64-release.1.0.0
-chmod +x parasight-linux-amd64-release.1.0.0
+wget https://github.com/govind-deshmukh/parasight/raw/main/releases/parasight-linux-amd64-release.1.1.0
+chmod +x parasight-linux-amd64-release.1.1.0
 ```
 
 ## Usage
 
 ```bash
-./parasight-linux-amd64-release.1.0.0 -p 39998 -logs "app:/path/to/app.log,error:/path/to/error.log" -system_metrics "cpu,memory,disk"
+# Allow all hosts (default)
+./parasight-linux-amd64-release.1.1.0 -p 39998 -logs "app:/path/to/app.log" -system_metrics "cpu,memory,disk"
+
+# Restrict to specific IPs
+./parasight-linux-amd64-release.1.1.0 -p 39998 -logs "app:/path/to/app.log" -system_metrics "cpu,memory,disk" -allowed_hosts "10.0.0.1,10.0.0.2"
 ```
+
+## Options
+
+| Flag              | Description                          | Default |
+| ----------------- | ------------------------------------ | ------- |
+| `-p`              | Port                                 | 8080    |
+| `-logs`           | Log files (name:path,name:path)      | -       |
+| `-system_metrics` | Metrics to collect (cpu,memory,disk) | -       |
+| `-allowed_hosts`  | Allowed IPs (\* or ip1,ip2)          | \*      |
 
 ## Build from source
 

@@ -5,7 +5,7 @@ Lightweight Go agent that runs alongside your application. Exposes logs and syst
 ## Download
 
 ```bash
-wget https://github.com/govind-deshmukh/parasight/raw/main/releases/parasight-linux-amd64-release.1.1.0
+wget https://github.com/govind-deshmukh/parasight/raw/master/releases/parasight-linux-amd64-release.1.1.0
 chmod +x parasight-linux-amd64-release.1.1.0
 ```
 

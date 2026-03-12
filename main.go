@@ -123,7 +123,8 @@ func logHandler(path string) http.HandlerFunc {
 			lines = 100
 		}
 
-		content, err := tailFile(path, lines)
+		resolvedPath := strings.ReplaceAll(path, "{date}", time.Now().Format("2006-01-02"))
+		content, err := tailFile(resolvedPath, lines)
 		if err != nil {
 			http.Error(w, err.Error(), 500)
 			return

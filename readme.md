@@ -28,6 +28,18 @@ chmod +x parasight-linux-amd64-release.1.1.0
 | `-system_metrics` | Metrics to collect (cpu,memory,disk) | -       |
 | `-allowed_hosts`  | Allowed IPs (\* or ip1,ip2)          | \*      |
 
+### Date-rotating log files
+
+Use the `{date}` placeholder in the log path to automatically resolve to today's date (`YYYY-MM-DD`) at request time. This is useful when your application writes to date-suffixed log files that rotate daily.
+
+```bash
+./parasight-linux-amd64-release.1.1.0 -p 39998 \
+  -logs "access:/opt/apps/ns/logs/access-{date}.log,app:/opt/apps/ns/logs/application-{date}.log" \
+  -system_metrics "cpu,memory,disk"
+```
+
+The placeholder resolves at each request, so the agent rolls over to the next day's file automatically at midnight with no restart required.
+
 ## Build from source
 
 ```bash
